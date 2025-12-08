@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Visited UNESCO World Heritages</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+        }
+        #map {
+            width: 80vw;
+            height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .heritage-icon {
+            font-size: 28px;
+            line-height: 28px;
+            text-align: center;
+        }
+        .heritage-partial {
+            opacity: 0.6;
+        }
+
+        .heritage-legend {
+            background: white;
+            padding: 10px 14px;
+            font-size: 14px;
+            line-height: 20px;
+            border-radius: 6px;
+            box-shadow: 0 0 6px rgba(0,0,0,0.25);
+        }
+
+        .legend-icon {
+            font-size: 20px;
+            margin-right: 6px;
+        }
+
+        .legend-partial {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="whc-sites-2025.js"></script>
+
+<script>
+    const map = L.map('map').setView([20, 0], 2);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const oldVisit = "before 2024"
+    const visitedHeritage = {
+        "Temple and Cemetery of Confucius and the Kong Family Mansion in Qufu": {
+            date: oldVisit
+        },
+        "Beijing Central Axis: A Building Ensemble Exhibiting the Ideal Order of the Chinese Capital": {
+            date: oldVisit
+        },
+        "Classical Gardens of Suzhou": {
+            date: oldVisit
+        },
+        "Imperial Palaces of the Ming and Qing Dynasties in Beijing and Shenyang": {
+            date: oldVisit,
+            type: "partial"
+        },
+        "Historic Monuments of Dengfeng in “The Centre of Heaven and Earth”": {
+            date: oldVisit,
+            type: "partial"
+        },
+        "Imperial Tombs of the Ming and Qing Dynasties": {
+            date: oldVisit,
+            type: "partial"
+        },
+        "Longmen Grottoes": {
+            date: oldVisit
+        },
+        "Mausoleum of the First Qin Emperor": {
+            date: oldVisit
+        },
+        "Mount Qingcheng and the Dujiangyan Irrigation System": {
+            date: oldVisit,
+            type: "partial"
+        },
+        "Mount Wutai": {
+            date: "2024-08"
+        },
+        "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor": {
+            date: oldVisit,
+            type: "partial"
+        },
+        "Summer Palace, an Imperial Garden in Beijing": {
+            date: oldVisit
+        },
+        "Temple of Heaven: an Imperial Sacrificial Altar in Beijing": {
+            date: oldVisit
+        },
+        "The Grand Canal": {
+            date: oldVisit,
+            type: "partial"
+        },
+        "The Great Wall": {
+            date: oldVisit,
+            type: "partial"
+        },
+        "West Lake Cultural Landscape of Hangzhou": {
+            date: oldVisit
+        },
+        "Yin Xu": {
+            date: "2024-03"
+        },
+        "Yungang Grottoes": {
+            date: "2024-04"
+        },
+        "Mount Taishan":{
+            date: oldVisit
+        },
+        "Historic Areas of Istanbul":{
+            date: "2025-02"
+        },
+        "Historic Centre of Rome, the Properties of the Holy See in that City Enjoying Extraterritorial Rights and San Paolo Fuori le Mura":{
+            date: "2025-02",
+            type: "partial"
+        },       
+        "Villa Adriana (Tivoli)":{
+            date: "2025-02"
+        },     
+        "Villa d\'Este, Tivoli":{
+            date: "2025-02"
+        },
+        "Strasbourg, Grande-Île and <em>Neustadt</em>":{
+            date: "2024-11",
+            type: "partial"
+        },
+        "Vatican City":{
+            date: "2025-02"
+        },
+        "Historic Centre of Vienna":{
+            date: "2025-04"
+        },
+        "Palace and Gardens of Schönbrunn":{
+            date: "2025-04"
+        },
+        "Abbey of St Gall":{
+            date: "2025-04"
+        },
+        "Old City of Berne":{
+            date: "2025-11"
+        },
+        "Three Castles, Defensive Wall and Ramparts of the Market-Town of Bellinzona":{
+            date: "2025-06"
+        },
+        "Aachen Cathedral":{
+            date: "2024-12"
+        },
+        "Cologne Cathedral":{
+            date: "2024-12"
+        },
+        "Maulbronn Monastery Complex":{
+            date: "2024-12"
+        },
+        "Roman Monuments, Cathedral of St Peter and Church of Our Lady in Trier":{
+            date: "2024-12"
+        },
+        "Speyer Cathedral":{
+            date: "2024-12"
+        },
+        "Monastic Island of Reichenau":{
+            date: "2025-04"
+        },
+        "Museumsinsel (Museum Island), Berlin":{
+            date: "2024-12"
+        },
+    };
+
+    const iconCultural = L.divIcon({
+        html: '🏛️',
+        className: 'heritage-icon',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
+    });
+
+    const iconNatural = L.divIcon({
+        html: '🌲',
+        className: 'heritage-icon',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
+    });
+
+    const iconMixed = L.divIcon({
+        html: '🚞',
+        className: 'heritage-icon',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
+    });
+
+    const iconPartial = L.divIcon({
+        html: '🚧',
+        className: 'heritage-icon heritage-partial',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
+    });
+
+    function getIconFromCategory(category) {
+        if (category === "Natural") return iconNatural;
+        if (category === "Mixed") return iconMixed;
+        return iconCultural;
+    }
+
+    const markers = [];
+
+    heritageData.forEach(row => {
+        const nameEn = (row.name_en || '').trim();
+        if (!(nameEn in visitedHeritage)) return;
+
+        const info = visitedHeritage[nameEn];
+        const lat = parseFloat(row.latitude);
+        const lng = parseFloat(row.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        const zh = (row.name_zh || '').trim();
+        const date = info.date;
+        const category = row.category;
+        
+        const type = info.type || category.toLowerCase(); 
+        const icon = info.type === "partial"
+            ? iconPartial
+            : getIconFromCategory(category);
+
+        let popup = `<b>${nameEn}</b><br><b>${zh}</b><br>Visited: ${date}`;
+        if (info.type === "partial") popup += `<br>Partially visited. To be further explored...`;
+
+        const marker = L.marker([lat, lng], { icon })
+            .addTo(map)
+            .bindPopup(popup);
+
+        markers.push(marker);
+    });
+
+    if (markers.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.2));
+    }
+
+    const legend = L.control({ position: "bottomright" });
+
+    legend.onAdd = function (map) {
+        const div = L.DomUtil.create("div", "heritage-legend");
+        div.innerHTML = `
+            <div><span class="legend-icon">🏛️</span> Cultural</div>
+            <div><span class="legend-icon">🌲</span> Natural</div>
+            <div><span class="legend-icon">🚞</span> Mixed</div>
+            <div><span class="legend-icon legend-partial">🚧</span> Partial visit</div>
+        `;
+        return div;
+    };
+
+    legend.addTo(map);
+</script>
+
+</body>
+</html>
