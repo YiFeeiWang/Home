@@ -185,7 +185,8 @@
             date: "2025-04"
         },
         "Museumsinsel (Museum Island), Berlin":{
-            date: "2024-12"
+            date: "2024-12",
+            type: "partial"
         },
     };
 
@@ -238,7 +239,7 @@
         const lng = parseFloat(row.longitude);
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-        const zh = (row.name_zh || '').trim();
+        // const zh = (row.name_zh || '').trim();
         const date = info.date;
         const category = row.category;
         
@@ -247,7 +248,7 @@
             ? iconPartial
             : getIconFromCategory(category);
 
-        let popup = `<b>${nameEn}</b><br><b>${zh}</b><br>Visited: ${date}`;
+        let popup = `<b>${nameEn}</b><br>Visited: ${date}`;
         if (info.type === "partial") popup += `<br>Partially visited. To be further explored...`;
 
         const marker = L.marker([lat, lng], { icon })
