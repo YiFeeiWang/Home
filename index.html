@@ -71,14 +71,18 @@
             date: oldVisit
         },
         "Beijing Central Axis: A Building Ensemble Exhibiting the Ideal Order of the Chinese Capital": {
-            date: oldVisit
+            date: oldVisit,
         },
         "Classical Gardens of Suzhou": {
             date: oldVisit
         },
         "Imperial Palaces of the Ming and Qing Dynasties in Beijing and Shenyang": {
             date: oldVisit,
-            type: "partial"
+            type: "partial",
+            coordinates: [
+                "N39 55 1.62",
+                "E116 23 49.74"
+            ]
         },
         "Historic Monuments of Dengfeng in “The Centre of Heaven and Earth”": {
             date: oldVisit,
@@ -86,7 +90,11 @@
         },
         "Imperial Tombs of the Ming and Qing Dynasties": {
             date: oldVisit,
-            type: "partial"
+            type: "partial",
+            coordinates: [
+                "N40 16 10.40",
+                "E116 14 40.60"
+            ]
         },
         "Longmen Grottoes": {
             date: oldVisit
@@ -103,7 +111,11 @@
         },
         "Silk Roads: the Routes Network of Chang'an-Tianshan Corridor": {
             date: oldVisit,
-            type: "partial"
+            type: "partial",
+            coordinates: [
+                "N34 13 11",
+                "E108 57 34"
+            ]
         },
         "Summer Palace, an Imperial Garden in Beijing": {
             date: oldVisit
@@ -113,11 +125,19 @@
         },
         "The Grand Canal": {
             date: oldVisit,
-            type: "partial"
+            type: "partial",
+            coordinates: [
+                "N35 4 40",
+                "E116 41 50"
+            ]
         },
         "The Great Wall": {
             date: oldVisit,
-            type: "partial"
+            type: "partial",
+            coordinates: [
+                "N40 21 0.00",
+                "E116 1 0.00"
+            ]
         },
         "West Lake Cultural Landscape of Hangzhou": {
             date: oldVisit
@@ -230,20 +250,67 @@
 
     const markers = [];
 
+    function dmsToDecimal(value) {
+        if (typeof value === 'number') {
+            return value;
+        }
+
+        if (typeof value !== 'string') {
+            return NaN;
+        }
+
+        let str = value.trim().toUpperCase();
+        if (!str) return NaN;
+
+        if (!/^[NSEW]/.test(str[0])) {
+            const num = parseFloat(str);
+            return Number.isFinite(num) ? num : NaN;
+        }
+
+        const direction = str[0];
+        const rest = str.slice(1).trim();
+
+        const parts = rest.split(/[^\d.]+/).filter(Boolean);
+
+        const deg = parseFloat(parts[0] || '0');
+        const min = parseFloat(parts[1] || '0');
+        const sec = parseFloat(parts[2] || '0');
+
+        if (!Number.isFinite(deg) || !Number.isFinite(min) || !Number.isFinite(sec)) {
+            return NaN;
+        }
+
+        let decimal = deg + min / 60 + sec / 3600;
+
+        if (direction === 'S' || direction === 'W') {
+            decimal = -decimal;
+        }
+
+        return decimal;
+    }
+
     heritageData.forEach(row => {
         const nameEn = (row.name_en || '').trim();
         if (!(nameEn in visitedHeritage)) return;
 
         const info = visitedHeritage[nameEn];
-        const lat = parseFloat(row.latitude);
-        const lng = parseFloat(row.longitude);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-        // const zh = (row.name_zh || '').trim();
+    let lat, lng;
+
+    if (info.coordinates && Array.isArray(info.coordinates) && info.coordinates.length === 2) {
+        lat = dmsToDecimal(info.coordinates[0]);
+        lng = dmsToDecimal(info.coordinates[1]);
+    } else {
+        lat = parseFloat(row.latitude);
+        lng = parseFloat(row.longitude);
+    }
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
         const date = info.date;
         const category = row.category;
-        
-        const type = info.type || category.toLowerCase(); 
+
+        const type = info.type || category.toLowerCase();
         const icon = info.type === "partial"
             ? iconPartial
             : getIconFromCategory(category);
@@ -257,6 +324,7 @@
 
         markers.push(marker);
     });
+
 
     if (markers.length > 0) {
         const group = L.featureGroup(markers);
